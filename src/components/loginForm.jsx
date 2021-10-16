@@ -17,15 +17,14 @@ class LoginForm extends Component {
   };
 
   validate = () => {
-    const results = Joi.validate(this.state.errors.account, this.schema, {
+    const results = Joi.validate(this.state.account, this.schema, {
       abortEarly: false,
     });
     console.log(results);
 
-    if (!results.error) return null;
+    if (results.error) return;
 
     const errors = {};
-
     for (let item of results.error.detail) errors[item.path[0]] = item.message;
     return errors;
   };
@@ -35,6 +34,7 @@ class LoginForm extends Component {
 
     const errors = this.validate();
     this.setState({ errors: errors || {} });
+    console.log(this.state.errors);
     if (errors) return;
   };
 
