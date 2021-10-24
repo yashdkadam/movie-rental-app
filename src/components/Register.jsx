@@ -3,9 +3,19 @@ import Joi from "joi-browser";
 import Form from "./common/form";
 
 class LoginForm extends Form {
+  state = {
+    data: {
+      username: "",
+      password: "",
+      name: "",
+    },
+    errors: {},
+  };
+
   schema = {
-    username: Joi.string().required().label("Username"),
-    password: Joi.string().required().label("Password"),
+    username: Joi.string().required().label("Username").email(),
+    password: Joi.string().required().label("Password").min(5),
+    name: Joi.string().required().label("Name"),
   };
 
   doSubmit = () => {
@@ -19,6 +29,7 @@ class LoginForm extends Form {
         <form onSubmit={this.handleSubmit}>
           {this.renderInput("Username", "username")}
           {this.renderInput("Password", "password", "password")}
+          {this.renderInput("Name", "name")}
 
           {this.renderButton("Login")}
         </form>
