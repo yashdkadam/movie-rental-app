@@ -1,26 +1,58 @@
 import React, { Component } from "react";
 import "./App.css";
+import http from "./services/httpService";
+import config from "./config.json";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 class App extends Component {
   state = {
-    posts: []
+    posts: [],
   };
 
-  handleAdd = () => {
-    console.log("Add");
+  async componentDidMount() {
+    const { data: posts } = await http.get(config.apiEndpoint);
+    this.setState({ posts });
+  }
+
+  handleAdd = async () => {
+    const obj = { title: "a", body: "b" };
+    const { data: post } = await http.post(config.apiEndpoint, obj);
+    console.log(post);
+
+    const posts = [post, ...this.state.posts];
+    this.setState({ posts });
   };
 
-  handleUpdate = post => {
-    console.log("Update", post);
+  handleUpdate = async (post) => {
+    post.title = "Updated";
+    await http.put(config.apiEndpoint + "/" + post.id, post);
+
+    const posts = [...this.state.posts];
+    const index = posts.indexOf(post);
+    posts[index] = { ...post };
+    this.setState(posts);
   };
 
-  handleDelete = post => {
-    console.log("Delete", post);
+  handleDelete = async (post) => {
+    const originals = this.state.posts;
+
+    const posts = this.state.posts.filter((p) => p.id !== post.id);
+    this.setState({ posts });
+    try {
+      await http.delete(config.apiEndpoint + "/" + post.id);
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404) {
+        alert("This post has already been deleted.");
+      }
+      this.setState({ posts: originals });
+    }
   };
 
   render() {
     return (
       <React.Fragment>
+        <ToastContainer />
         <button className="btn btn-primary" onClick={this.handleAdd}>
           Add
         </button>
@@ -33,7 +65,7 @@ class App extends Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.posts.map(post => (
+            {this.state.posts.map((post) => (
               <tr key={post.id}>
                 <td>{post.title}</td>
                 <td>
